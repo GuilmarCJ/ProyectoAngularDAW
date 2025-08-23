@@ -1,0 +1,80 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { MaterialService } from '../../services/material.service';
+import { AuthService } from '../../services/auth.service';
+import { Material } from '../../models/material.model';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './dashboard.html',
+  styleUrl: './dashboard.css'
+})
+export class Dashboard implements OnInit {
+  private materialService = inject(MaterialService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  materiales: Material[] = [];
+  isLoading: boolean = true;
+  errorMessage: string = '';
+  username: string | null = null;
+  rol: string | null = null;
+
+  ngOnInit(): void {
+    this.loadMateriales();
+    this.username = this.authService.getUsername();
+    this.rol = this.authService.getRol();
+  }
+
+  loadMateriales(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.materialService.getMateriales().subscribe({
+      next: (response) => {
+        this.materiales = response.materiales;
+        this.isLoading = false;
+        console.log('Materiales cargados:', response);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = 'Error al cargar los materiales';
+        console.error('Error:', error);
+        
+        // Si hay error de autenticación, redirigir al login
+        if (error.status === 401 || error.status === 403) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      }
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  // Método para formatear fechas
+  formatDate(dateString: string): string {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString();
+  }
+
+  getEstadoClass(estado: string | undefined): string {
+  if (!estado) return 'estado-pendiente';
+  
+  const estadoLower = estado.toLowerCase();
+  if (estadoLower.includes('activo') || estadoLower.includes('completado')) {
+    return 'estado-activo';
+  } else if (estadoLower.includes('pendiente')) {
+    return 'estado-pendiente';
+  } else {
+    return 'estado-inactivo';
+  }
+}
+
+}

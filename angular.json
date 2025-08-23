@@ -24,6 +24,9 @@
             "styles": [
               "src/styles.css"
             ],
+            "polyfills": [ 
+              "zone.js"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -81,10 +84,17 @@
             ],
             "styles": [
               "src/styles.css"
+            ],
+            "polyfills": [ 
+              "zone.js",
+              "zone.js/testing"
             ]
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "2b876cb7-2ab5-4e5e-b160-7bc602d66504"
   }
 }
