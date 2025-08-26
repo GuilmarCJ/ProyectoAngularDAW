@@ -38,17 +38,22 @@ private fb = inject(FormBuilder);
       };
 
       this.authService.login(credentials).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          console.log('Login exitoso:', response);
-          this.router.navigate(['/dashboard']); // Redirige al dashboard
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.error?.message || 'Error en el login. Verifica tus credenciales.';
-          console.error('Error en login:', error);
-        }
-      });
+  next: (response) => {
+    this.isLoading = false;
+    console.log('Login exitoso:', response);
+
+    // 👇 Guardar rol en localStorage
+    
+    localStorage.setItem('rol', response.rol);
+
+    this.router.navigate(['/dashboard']);
+  },
+  error: (error) => {
+    this.isLoading = false;
+    this.errorMessage = error.error?.message || 'Error en el login.';
+  }
+});
+
     }
   }
 

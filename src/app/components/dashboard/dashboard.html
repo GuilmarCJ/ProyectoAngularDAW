@@ -34,6 +34,7 @@
               <th>Reconteo</th>
               <th>Última Actualización</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -50,6 +51,9 @@
                 <span [class]="getEstadoClass(material.estado)">
                   {{ material.estado || 'PENDIENTE' }}
                 </span>
+              </td>
+              <td>
+                <button class="btn-conteo" (click)="irAConteo(material.id)">Ir a Conteo</button>
               </td>
             </tr>
           </tbody>

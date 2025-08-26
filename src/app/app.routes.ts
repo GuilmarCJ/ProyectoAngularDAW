@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Login } from './components/login/login';
 import { Dashboard } from './components/dashboard/dashboard';
+import { ConteoComponent } from './components/conteo/conteo';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
@@ -11,15 +12,21 @@ export const routes: Routes = [
   { 
     path: 'dashboard', 
     component: Dashboard,
-    canActivate: [authGuard]  // ← Aquí aplicas el guard
+    canActivate: [authGuard]  
+  },
+  { 
+    path: 'conteo/:id',  
+    component: ConteoComponent,
+    canActivate: [authGuard]
   },
   { 
     path: '', 
-    redirectTo: '/dashboard',  // ← Cambia esto de '/login' a '/dashboard'
+    redirectTo: '/dashboard', 
     pathMatch: 'full' 
   },
   { 
     path: '**', 
-    redirectTo: '/dashboard'  // ← Ruta comodín para cualquier otra ruta
+    redirectTo: '/dashboard' 
   }
 ];
+

@@ -1,0 +1,83 @@
+.conteo-form {
+  max-width: 450px;
+  margin: 40px auto;
+  padding: 25px 30px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.conteo-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 22px;
+  color: #222;
+  letter-spacing: 0.5px;
+}
+
+.conteo-form div {
+  margin-bottom: 18px;
+}
+
+.conteo-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #444;
+  font-size: 14px;
+}
+
+.conteo-form input,
+.conteo-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.conteo-form input:focus,
+.conteo-form select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+}
+
+.conteo-form button {
+  margin-right: 10px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.conteo-form button[type="submit"] {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  color: white;
+}
+
+.conteo-form button[type="submit"]:hover {
+  background: linear-gradient(90deg, #0056b3, #00408d);
+}
+
+.conteo-form button[type="button"] {
+  background: #6c757d;
+  color: white;
+}
+
+.conteo-form button[type="button"]:hover {
+  background: #5a6268;
+}
+
+.conteo-form p {
+  margin-top: 18px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+}

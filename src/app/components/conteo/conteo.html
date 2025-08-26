@@ -1,0 +1,56 @@
+<div class="conteo-form">
+  <h2>Registrar Conteo</h2>
+
+  <form (ngSubmit)="registrarConteo()" #conteoForm="ngForm">
+    <!-- ID solo lectura -->
+    <div>
+      <label for="materialId">ID Material:</label>
+      <input 
+        type="number" 
+        id="materialId" 
+        [(ngModel)]="conteoData.materialId" 
+        name="materialId" 
+        readonly />
+    </div>
+
+    <!-- Cantidad -->
+    <div>
+      <label for="conteo">Cantidad:</label>
+      <input 
+        type="number" 
+        id="conteo"
+        [(ngModel)]="conteoData.conteo" 
+        name="conteo" 
+        required />
+    </div>
+
+    <!-- Observación -->
+    <div>
+      <label for="obs">Observación:</label>
+      <input 
+        type="text" 
+        id="obs"
+        [(ngModel)]="conteoData.obs" 
+        name="obs" />
+    </div>
+
+    <!-- 👇 Campo extra SOLO para ADMINISTRADOR -->
+    <div *ngIf="usuarioRol === 'ADMINISTRADOR'">
+      <label for="local">Seleccione Local:</label>
+      <select 
+        id="local"
+        [(ngModel)]="conteoData.local" 
+        name="local" 
+        required>
+        <option value="" disabled selected>-- Seleccione un local --</option>
+        <option value="HUACHIPA">HUACHIPA</option>
+        <option value="SULLANA">SULLANA</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="conteoForm.invalid">Registrar</button>
+    <button type="button" (click)="regresar()">Regresar al Materiales</button>
+  </form>
+
+  <p>{{ mensaje }}</p>
+</div>
