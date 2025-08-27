@@ -1,68 +1,256 @@
 <div class="dashboard-container">
-  <header class="dashboard-header">
-    <h1>Dashboard de Materiales</h1>
-    <div class="user-info">
-      <span>Usuario: {{ username }} ({{ rol }})</span>
-      <button (click)="logout()" class="btn-logout">Cerrar Sesión</button>
-    </div>
-  </header>
+  <!-- Botón de menú hamburguesa -->
+  <button class="menu-toggle" (click)="toggleSidebar()">☰</button>
 
-  <div class="dashboard-content">
-    <div *ngIf="isLoading" class="loading">
-      <p>Cargando materiales...</p>
+  <!-- Sidebar mejorado -->
+  <nav class="sidebar" [class.open]="isSidebarOpen">
+    <div class="sidebar-header">
+      <h3>Soluciones Industriales</h3>
+    </div>
+    <ul>
+      <li><a href="#" class="active">🏠 Inicio</a></li>
+      <li><a href="#">📦 Materiales</a></li>
+      <li><a href="#">📊 Reportes</a></li>
+      <li><a href="#">📋 Inventario</a></li>
+      <li><a href="#">🔍 Auditoría</a></li>
+      <li><a href="#">⚙️ Configuración</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>Sistema v2.1</p>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="main-content" [class.shift]="isSidebarOpen">
+    <header class="dashboard-header">
+      <div class="header-left">
+        <h1>Gestión de Materiales</h1>
+        <p class="header-subtitle">Sistema de control de inventario</p>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar">
+            {{ username?.charAt(0) | uppercase }}
+          </div>
+          <div class="user-details">
+            <span class="user-name">{{ username }}</span>
+            <span class="user-role">{{ rol }}</span>
+          </div>
+          <button (click)="logout()" class="btn-logout" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filtros y búsqueda -->
+    <div class="controls-row">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Buscar material..." />
+      </div>
+      <div class="filter-controls">
+        <select>
+          <option value="">Todos los locales</option>
+          <option value="HUACHIPA">HUACHIPA</option>
+          <option value="SULLANA">SULLANA</option>
+        </select>
+        <select>
+          <option value="">Todos los estados</option>
+          <option value="ACTIVO">ACTIVO</option>
+          <option value="PENDIENTE">PENDIENTE</option>
+          <option value="INACTIVO">INACTIVO</option>
+        </select>
+        <button class="btn-filter">
+          <i class="fas fa-filter"></i> Filtrar
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
+    <!-- Tarjetas de estadísticas mejoradas -->
+    <section class="stats-cards">
+      <div class="card stat-card">
+        <div class="card-icon total">
+          <i class="fas fa-boxes"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ materiales.length }}</h3>
+          <p>Total Materiales</p>
+        </div>
+      </div>
+      
+      <div class="card stat-card pending">
+        <div class="card-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ getPendientes() }}</h3>
+          <p>Pendientes</p>
+          <span class="card-percentage">{{ getPendientes() / materiales.length * 100 | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+      
+      <div class="card stat-card completed">
+        <div class="card-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ getActivos() }}</h3>
+          <p>Completados</p>
+          <span class="card-percentage">{{ getActivos() / materiales.length * 100 | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+      
+      <div class="card stat-card updated">
+        <div class="card-icon">
+          <i class="fas fa-sync-alt"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ materiales.length - getPendientes() - getActivos() }}</h3>
+          <p>Actualizados</p>
+          <span class="card-updated">Hoy: {{ materiales.length > 0 ? '4' : '0' }}</span>
+        </div>
+      </div>
+    </section>
 
-    <div *ngIf="!isLoading && !errorMessage">
-      <div class="materiales-info">
-        <h2>Materiales Encontrados: {{ materiales.length }}</h2>
+    <!-- Resumen de actividad -->
+    <section class="activity-summary">
+      <div class="summary-header">
+        <h2>Resumen de Actividad</h2>
+        <button class="btn-refresh" (click)="loadMateriales()">
+          <i class="fas fa-redo"></i> Actualizar
+        </button>
+      </div>
+      
+      <div class="summary-content">
+        <div class="summary-item">
+          <span class="summary-label">Última actualización:</span>
+          <span class="summary-value">{{ getLastUpdate() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Materiales sin conteo:</span>
+          <span class="summary-value">{{ getPendientes() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Próxima auditoría:</span>
+          <span class="summary-value">15 Mar 2024</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard-content">
+      <div *ngIf="isLoading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Cargando materiales, por favor espere...</p>
       </div>
 
-      <div class="table-container">
-        <table class="materiales-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Material</th>
-              <th>Descripción</th>
-              <th>Local</th>
-              <th>Cantidad</th>
-              <th>Conteo</th>
-              <th>Reconteo</th>
-              <th>Última Actualización</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let material of materiales" class="material-row">
-              <td>{{ material.id }}</td>
-              <td>{{ material.material }}</td>
-              <td>{{ material.descripcion || '-' }}</td>
-              <td>{{ material.local }}</td>
-              <td>{{ material.cantidad }}</td>
-              <td>{{ material.conteo || '-' }}</td>
-              <td>{{ material.reconteo || '-' }}</td>
-              <td>{{ formatDate(material.fecReg) }}</td>
-              <td>
-                <span [class]="getEstadoClass(material.estado)">
-                  {{ material.estado || 'PENDIENTE' }}
-                </span>
-              </td>
-              <td>
-                <button class="btn-conteo" (click)="irAConteo(material.id)">Ir a Conteo</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div *ngIf="errorMessage" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>{{ errorMessage }}</p>
+        <button (click)="loadMateriales()" class="btn-retry">Reintentar</button>
+      </div>
 
-        <div *ngIf="materiales.length === 0" class="no-data">
-          <p>No se encontraron materiales</p>
+      <div *ngIf="!isLoading && !errorMessage">
+        <div class="table-header">
+          <h2>Lista de Materiales</h2>
+          <div class="table-actions">
+            <button class="btn-export">
+              <i class="fas fa-file-export"></i> Exportar
+            </button>
+            <button class="btn-print">
+              <i class="fas fa-print"></i> Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="materiales-table">
+            <thead>
+              <tr>
+                <th>ID <i class="fas fa-sort"></i></th>
+                <th>Material <i class="fas fa-sort"></i></th>
+                <th>Descripción</th>
+                <th>Local <i class="fas fa-sort"></i></th>
+                <th class="text-right">Cantidad <i class="fas fa-sort"></i></th>
+                <th class="text-right">Conteo</th>
+                <th class="text-right">Reconteo</th>
+                <th>Última Actualización <i class="fas fa-sort"></i></th>
+                <th>Estado <i class="fas fa-sort"></i></th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let material of materiales" class="material-row">
+                <td class="id-cell">{{ material.id }}</td>
+                <td class="material-name">{{ material.material }}</td>
+                <td class="description-cell">{{ material.descripcion || '-' }}</td>
+                <td>
+                  <span class="local-badge" [class.huachipa]="material.local === 'HUACHIPA'" 
+                    [class.sullana]="material.local === 'SULLANA'">
+                    {{ material.local }}
+                  </span>
+                </td>
+                <td class="text-right">{{ material.cantidad }}</td>
+                <td class="text-right">{{ material.conteo || '-' }}</td>
+                <td class="text-right">{{ material.reconteo || '-' }}</td>
+                <td>{{ formatDate(material.fecReg) }}</td>
+                <td>
+                  <span [class]="'status-badge ' + getEstadoClass(material.estado)">
+                    <i class="badge-icon" [class]="getEstadoIcon(material.estado)"></i>
+                    {{ material.estado || 'PENDIENTE' }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-conteo" (click)="irAConteo(material.id)">
+                    <i class="fas fa-clipboard-check"></i> Conteo
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div *ngIf="materiales.length === 0" class="no-data">
+            <i class="fas fa-inbox"></i>
+            <h3>No se encontraron materiales</h3>
+            <p>No hay materiales registrados en el sistema</p>
+          </div>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination" *ngIf="materiales.length > 0">
+          <button class="pagination-btn" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="pagination-info">Página 1 de 1</span>
+          <button class="pagination-btn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          <span class="pagination-total">Mostrando {{ materiales.length }} registros</span>
         </div>
       </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+      <p>© 2024 Soluciones Industriales del Pacífico S.A.C. - Sistema de Gestión de Inventarios</p>
+    </footer>
   </div>
 </div>
+
+
+
+<script>
+// Función para simular el método getEstadoIcon que debe estar en el componente TypeScript
+function getEstadoIcon(estado) {
+  if (!estado) return 'fas fa-clock';
+  
+  const estadoLower = estado.toLowerCase();
+  if (estadoLower.includes('activo') || estadoLower.includes('completado')) {
+    return 'fas fa-check-circle';
+  } else if (estadoLower.includes('pendiente')) {
+    return 'fas fa-clock';
+  } else {
+    return 'fas fa-times-circle';
+  }
+}
+</script>

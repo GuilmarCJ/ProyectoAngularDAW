@@ -23,6 +23,8 @@ export class Dashboard implements OnInit {
   username: string | null = null;
   rol: string | null = null;
 
+    isSidebarOpen: boolean = false;
+
   ngOnInit(): void {
     this.loadMateriales();
     this.username = this.authService.getUsername();
@@ -79,4 +81,52 @@ export class Dashboard implements OnInit {
   irAConteo(id: number): void {
     this.router.navigate(['/conteo', id]);
   }
+
+  // 🔹 NUEVOS MÉTODOS PARA EL DASHBOARD
+  getPendientes(): number {
+  if (!this.materiales) return 0;
+  return this.materiales.filter(m => !m.estado || m.estado.toUpperCase() === 'PENDIENTE').length;
+}
+
+getActivos(): number {
+  if (!this.materiales) return 0;
+  return this.materiales.filter(m => m.estado && m.estado.toUpperCase() === 'ACTIVO').length;
+}
+
+  getLastUpdate(): string {
+    if (this.materiales.length === 0) return '-';
+
+    const fechas = this.materiales
+      .map(m => new Date(m.fecSys ?? m.fecReg ?? m.fec ?? '')) // 👈 usamos tus campos reales
+      .filter(f => !isNaN(f.getTime()));
+    
+    if (fechas.length === 0) return '-';
+    
+    const ultimaFecha = new Date(Math.max(...fechas.map(f => f.getTime())));
+    return ultimaFecha.toLocaleString();
+  }
+
+  // Alternar el estado (abrir/cerrar)
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  // Método extra por si quieres cerrarlo manualmente
+  closeSidebar(): void {
+    this.isSidebarOpen = false;
+  }
+
+  getEstadoIcon(estado: string | undefined): string {
+    if (!estado) return 'fas fa-clock';
+    
+    const estadoLower = estado.toLowerCase();
+    if (estadoLower.includes('activo') || estadoLower.includes('completado')) {
+      return 'fas fa-check-circle';
+    } else if (estadoLower.includes('pendiente')) {
+      return 'fas fa-clock';
+    } else {
+      return 'fas fa-times-circle';
+    }
+  }
+
 }
