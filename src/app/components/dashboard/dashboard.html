@@ -9,10 +9,7 @@
   </div>
   <ul>
     <li><a href="#" class="active">🏠 Inicio</a></li>
-    <li><a href="#">📦 Materiales</a></li>
-    <li><a href="#">📊 Reportes</a></li>
-    <li><a href="#">📋 Inventario</a></li>
-    <li><a href="#">🔍 Auditoría</a></li>
+    
     
     <!-- Opción de Gestión de Usuarios (solo para admin) -->
     <!-- En el sidebar del dashboard -->
@@ -56,15 +53,19 @@
     <i class="fas fa-search"></i>
     <input 
       type="text" 
-      placeholder="Buscar material..." 
-      [(ngModel)]="filtroMaterial"
+      placeholder="Buscar por ID o Material" 
+      [(ngModel)]="filtroGeneral"
       (keyup.enter)="aplicarFiltros()" />
   </div>
   <div class="filter-controls">
     <select [(ngModel)]="filtroLocal" [disabled]="usuarioRol !== 'ADMINISTRADOR'">
       <option value="">Todos los locales</option>
       <option value="HUACHIPA">HUACHIPA</option>
-      <option value="SULLANA">SULLANA</option>
+              <option value="HUACHIPA">HUACHIPA13</option>
+              <option value="SULLANA">TRUJILLO</option>
+              <option value="SULLANA">SULLANA</option>
+              <option value="SULLANA">ATE</option>
+              <option value="SULLANA">CALLAO</option>
     </select>
     <select [(ngModel)]="filtroEstado">
       <option value="">Todos los estados</option>
@@ -307,7 +308,11 @@
               required>
               <option value="" disabled selected>-- Seleccione un local --</option>
               <option value="HUACHIPA">HUACHIPA</option>
+              <option value="HUACHIPA">HUACHIPA13</option>
+              <option value="SULLANA">TRUJILLO</option>
               <option value="SULLANA">SULLANA</option>
+              <option value="SULLANA">ATE</option>
+              <option value="SULLANA">CALLAO</option>
             </select>
           </div>
 
@@ -374,7 +379,11 @@
               required>
               <option value="" disabled selected>-- Seleccione un local --</option>
               <option value="HUACHIPA">HUACHIPA</option>
+              <option value="HUACHIPA">HUACHIPA13</option>
+              <option value="SULLANA">TRUJILLO</option>
               <option value="SULLANA">SULLANA</option>
+              <option value="SULLANA">ATE</option>
+              <option value="SULLANA">CALLAO</option>
             </select>
           </div>
 
@@ -392,6 +401,75 @@
 <!-- Modales de Gestión de Usuarios -->
 
 <!-- Modal Crear Usuario -->
+<div class="a" *ngIf="showCrearUsuarioModal" (click)="closeCrearUsuarioModal()">
+  <div class="b" (click)="$event.stopPropagation()">
+    <div class="c">
+      <h2>Crear Inventariador</h2>
+      <button class="c-close" (click)="closeCrearUsuarioModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form (ngSubmit)="crearUsuario()" #crearUsuarioForm="ngForm">
+      <div class="c-group">
+        <label for="username">Usuario</label>
+        <input type="text" id="username"
+          [(ngModel)]="nuevoUsuario.username" 
+          name="username" required minlength="3"
+          placeholder="Ingrese usuario..." />
+      </div>
+
+      <div class="c-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password"
+          [(ngModel)]="nuevoUsuario.password" 
+          name="password" required minlength="6"
+          placeholder="Ingrese contraseña..." />
+      </div>
+
+      <div class="c-group">
+        <label for="nombreCompleto">Nombre Completo</label>
+        <input type="text" id="nombreCompleto"
+          [(ngModel)]="nuevoUsuario.nombreCompleto" 
+          name="nombreCompleto" required
+          placeholder="Ingrese nombre completo..." />
+      </div>
+
+      <div class="c-group">
+        <label for="local">Local</label>
+        <select id="local" class="c-select"
+          [(ngModel)]="nuevoUsuario.local" 
+          name="local" required>
+          <option value="" disabled selected>-- Seleccione un local --</option>
+          <option value="HUACHIPA">HUACHIPA</option>
+              <option value="HUACHIPA">HUACHIPA13</option>
+              <option value="SULLANA">TRUJILLO</option>
+              <option value="SULLANA">SULLANA</option>
+              <option value="SULLANA">ATE</option>
+              <option value="SULLANA">CALLAO</option>
+        </select>
+      </div>
+
+      <div class="c-group">
+        <label for="almacen">Almacén</label>
+        <input type="text" id="almacen"
+          [(ngModel)]="nuevoUsuario.almacen" 
+          name="almacen" required
+          placeholder="Ingrese almacén..." />
+      </div>
+
+      <div class="c-actions">
+        <button type="button" class="c-btn-sec" (click)="closeCrearUsuarioModal()">Cancelar</button>
+        <button type="submit" [disabled]="crearUsuarioForm.invalid" class="c-btn">Crear Usuario</button>
+      </div>
+    </form>
+
+    <p class="c-msg" *ngIf="mensajeUsuario">{{ mensajeUsuario }}</p>
+  </div>
+</div>
+
+
+<!-- Modal Modificar Usuario -->
 <div class="modal-backdrop" *ngIf="showCrearUsuarioModal" (click)="closeCrearUsuarioModal()">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -443,7 +521,11 @@
           required>
           <option value="" disabled selected>-- Seleccione un local --</option>
           <option value="HUACHIPA">HUACHIPA</option>
-          <option value="SULLANA">SULLANA</option>
+              <option value="HUACHIPA">HUACHIPA13</option>
+              <option value="SULLANA">TRUJILLO</option>
+              <option value="SULLANA">SULLANA</option>
+              <option value="SULLANA">ATE</option>
+              <option value="SULLANA">CALLAO</option>
         </select>
       </div>
 
@@ -518,7 +600,11 @@
           required>
           <option value="" disabled selected>-- Seleccione un local --</option>
           <option value="HUACHIPA">HUACHIPA</option>
-          <option value="SULLANA">SULLANA</option>
+              <option value="HUACHIPA">HUACHIPA13</option>
+              <option value="SULLANA">TRUJILLO</option>
+              <option value="SULLANA">SULLANA</option>
+              <option value="SULLANA">ATE</option>
+              <option value="SULLANA">CALLAO</option>
         </select>
       </div>
 

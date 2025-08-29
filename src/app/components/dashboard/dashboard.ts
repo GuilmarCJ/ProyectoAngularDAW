@@ -33,11 +33,19 @@ export class Dashboard implements OnInit {
 
     isSidebarOpen: boolean = false;
 
-    filtroMaterial: string = '';
+    // 🔹 Filtros disponibles
+  filtroId: string = '';
+  filtroMaterial: string = '';
   filtroLocal: string = '';
-  filtroEstado: string = '';
+  filtroDescripcion: string = '';
+  filtroCantidad: string = '';
+  filtroGeneral: string = '';
+
+
   consultaId: string = '';
   filtrosActivos: boolean = false;
+  filtroEstado: string = '';
+
     
     showConteoModal: boolean = false;
     showReconteoModal: boolean = false;
@@ -275,35 +283,40 @@ reconteoData: ReconteoRequest = {
 
 aplicarFiltros(): void {
   this.isLoading = true;
-  
-  // Preparar los filtros para enviar al backend
-  const filtros: any = {};
 
-  if (this.filtroMaterial) {
-    filtros.material = this.filtroMaterial;
+  const filtros: any = { consultaId: this.consultaId };
+
+  if (this.filtroGeneral) {
+    // Si es número => buscar por ID
+    if (!isNaN(Number(this.filtroGeneral))) {
+      filtros.id = this.filtroGeneral;
+    } else {
+      // Si es texto => buscar en material y descripción
+      filtros.material = this.filtroGeneral;
+      filtros.descripcion = this.filtroGeneral;
+    }
   }
 
-  // Solo enviar local si es administrador y hay un local seleccionado
   if (this.usuarioRol === 'ADMINISTRADOR' && this.filtroLocal) {
     filtros.local = this.filtroLocal;
   }
 
-  // Usar el servicio de materiales en lugar de HttpClient directamente
   this.materialService.filtrarMateriales(this.consultaId, filtros)
     .subscribe({
       next: (materialesFiltrados) => {
         this.materialesFiltrados = materialesFiltrados;
         this.filtrosActivos = true;
         this.isLoading = false;
-        this.errorMessage = ''; // Limpiar mensajes de error previos
       },
-      // En el método aplicarFiltros, cambia el error handling:
       error: (error) => {
         this.handleFilterError(error);
         this.isLoading = false;
       }
     });
 }
+
+
+
 
  filtrarLocalmente(): void {
   let materialesFiltrados = [...this.materiales];
