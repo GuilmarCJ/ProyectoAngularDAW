@@ -4,21 +4,28 @@
 
   <!-- Sidebar mejorado -->
   <nav class="sidebar" [class.open]="isSidebarOpen">
-    <div class="sidebar-header">
-      <h3>Soluciones Industriales</h3>
-    </div>
-    <ul>
-      <li><a href="#" class="active">🏠 Inicio</a></li>
-      <li><a href="#">📦 Materiales</a></li>
-      <li><a href="#">📊 Reportes</a></li>
-      <li><a href="#">📋 Inventario</a></li>
-      <li><a href="#">🔍 Auditoría</a></li>
-      <li><a href="#">⚙️ Configuración</a></li>
-    </ul>
-    <div class="sidebar-footer">
-      <p>Sistema v2.1</p>
-    </div>
-  </nav>
+  <div class="sidebar-header">
+    <h3>Soluciones Industriales</h3>
+  </div>
+  <ul>
+    <li><a href="#" class="active">🏠 Inicio</a></li>
+    <li><a href="#">📦 Materiales</a></li>
+    <li><a href="#">📊 Reportes</a></li>
+    <li><a href="#">📋 Inventario</a></li>
+    <li><a href="#">🔍 Auditoría</a></li>
+    
+    <!-- Opción de Gestión de Usuarios (solo para admin) -->
+    <!-- En el sidebar del dashboard -->
+<li *ngIf="esAdministrador()">
+  <a [routerLink]="['/gestion-usuarios']">👥 Gestión de Usuarios</a>
+</li>
+    
+    <li><a href="#">⚙️ Configuración</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <p>Sistema v2.1</p>
+  </div>
+</nav>
 
   <!-- Contenido principal -->
   <div class="main-content" [class.shift]="isSidebarOpen">
@@ -45,27 +52,34 @@
 
     <!-- Filtros y búsqueda -->
     <div class="controls-row">
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Buscar material..." />
-      </div>
-      <div class="filter-controls">
-        <select>
-          <option value="">Todos los locales</option>
-          <option value="HUACHIPA">HUACHIPA</option>
-          <option value="SULLANA">SULLANA</option>
-        </select>
-        <select>
-          <option value="">Todos los estados</option>
-          <option value="ACTIVO">ACTIVO</option>
-          <option value="PENDIENTE">PENDIENTE</option>
-          <option value="INACTIVO">INACTIVO</option>
-        </select>
-        <button class="btn-filter">
-          <i class="fas fa-filter"></i> Filtrar
-        </button>
-      </div>
-    </div>
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input 
+      type="text" 
+      placeholder="Buscar material..." 
+      [(ngModel)]="filtroMaterial"
+      (keyup.enter)="aplicarFiltros()" />
+  </div>
+  <div class="filter-controls">
+    <select [(ngModel)]="filtroLocal" [disabled]="usuarioRol !== 'ADMINISTRADOR'">
+      <option value="">Todos los locales</option>
+      <option value="HUACHIPA">HUACHIPA</option>
+      <option value="SULLANA">SULLANA</option>
+    </select>
+    <select [(ngModel)]="filtroEstado">
+      <option value="">Todos los estados</option>
+      <option value="ACTIVO">ACTIVO</option>
+      <option value="PENDIENTE">PENDIENTE</option>
+      <option value="INACTIVO">INACTIVO</option>
+    </select>
+    <button class="btn-filter" (click)="aplicarFiltros()">
+      <i class="fas fa-filter"></i> Filtrar
+    </button>
+    <button class="btn-clear" (click)="limpiarFiltros()" *ngIf="filtrosActivos">
+      <i class="fas fa-times"></i> Limpiar
+    </button>
+  </div>
+</div>
 
     <!-- Tarjetas de estadísticas mejoradas -->
     <section class="stats-cards">
@@ -74,7 +88,7 @@
           <i class="fas fa-boxes"></i>
         </div>
         <div class="card-content">
-          <h3>{{ materiales.length }}</h3>
+          <h3>{{ materialesFiltrados.length }}</h3>
           <p>Total Materiales</p>
         </div>
       </div>
@@ -86,7 +100,7 @@
         <div class="card-content">
           <h3>{{ getPendientes() }}</h3>
           <p>Pendientes</p>
-          <span class="card-percentage">{{ getPendientes() / materiales.length * 100 | number:'1.0-0' }}%</span>
+          <span class="card-percentage">{{ getPendientes() / materialesFiltrados.length * 100 | number:'1.0-0' }}%</span>
         </div>
       </div>
       
@@ -180,7 +194,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let material of materiales" class="material-row">
+              <tr *ngFor="let material of materialesFiltrados" class="material-row">
                 <td class="id-cell">{{ material.id }}</td>
                 <td class="material-name">{{ material.material }}</td>
                 <td class="description-cell">{{ material.descripcion || '-' }}</td>
@@ -201,15 +215,20 @@
                   </span>
                 </td>
                 <td>
-                  <button class="btn-conteo" (click)="irAConteo(material.id)">
-                    <i class="fas fa-clipboard-check"></i> Conteo
-                  </button>
+                  <div class="action-buttons">
+                    <button class="btn-conteo" (click)="openConteoModal(material.id)">
+                      <i class="fas fa-clipboard-check"></i> Conteo
+                    </button>
+                    <button class="btn-reconteo" (click)="openReconteoModal(material.id)">
+                      <i class="fas fa-redo"></i> Reconteo
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <div *ngIf="materiales.length === 0" class="no-data">
+          <div *ngIf="materialesFiltrados.length === 0" class="no-data">
             <i class="fas fa-inbox"></i>
             <h3>No se encontraron materiales</h3>
             <p>No hay materiales registrados en el sistema</p>
@@ -225,7 +244,7 @@
           <button class="pagination-btn">
             <i class="fas fa-chevron-right"></i>
           </button>
-          <span class="pagination-total">Mostrando {{ materiales.length }} registros</span>
+          <span class="pagination-total">Mostrando {{ materialesFiltrados.length }} registros</span>
         </div>
       </div>
     </div>
@@ -234,23 +253,317 @@
     <footer class="dashboard-footer">
       <p>© 2024 Soluciones Industriales del Pacífico S.A.C. - Sistema de Gestión de Inventarios</p>
     </footer>
+
+    <!-- Modal de Conteo -->
+    <div class="modal-backdrop" *ngIf="showConteoModal" (click)="closeConteoModal()">
+      <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Registrar Conteo</h2>
+          <button class="modal-close" (click)="closeConteoModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <form (ngSubmit)="registrarConteo()" #conteoForm="ngForm">
+          <!-- ID solo lectura -->
+          <div class="form-group">
+            <label for="materialId">ID Material:</label>
+            <input 
+              type="number" 
+              id="materialId" 
+              [(ngModel)]="conteoData.materialId" 
+              name="materialId" 
+              readonly />
+          </div>
+
+          <!-- Cantidad -->
+          <div class="form-group">
+            <label for="conteo">Cantidad:</label>
+            <input 
+              type="number" 
+              id="conteo"
+              [(ngModel)]="conteoData.conteo" 
+              name="conteo" 
+              required />
+          </div>
+
+          <!-- Observación -->
+          <div class="form-group">
+            <label for="obs">Observación:</label>
+            <input 
+              type="text" 
+              id="obs"
+              [(ngModel)]="conteoData.obs" 
+              name="obs" />
+          </div>
+
+          <!-- 👇 Campo extra SOLO para ADMINISTRADOR -->
+          <div class="form-group" *ngIf="usuarioRol === 'ADMINISTRADOR'">
+            <label for="local">Seleccione Local:</label>
+            <select 
+              id="local"
+              [(ngModel)]="conteoData.local" 
+              name="local" 
+              required>
+              <option value="" disabled selected>-- Seleccione un local --</option>
+              <option value="HUACHIPA">HUACHIPA</option>
+              <option value="SULLANA">SULLANA</option>
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="closeConteoModal()">Cancelar</button>
+            <button type="submit" [disabled]="conteoForm.invalid" class="btn-primary">Registrar</button>
+          </div>
+        </form>
+
+        <p class="modal-message">{{ mensajeConteo }}</p>
+      </div>
+    </div>
+
+    <!-- Modal de Reconteo -->
+    <div class="modal-backdrop" *ngIf="showReconteoModal" (click)="closeReconteoModal()">
+      <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Registrar Reconteo</h2>
+          <button class="modal-close" (click)="closeReconteoModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <form (ngSubmit)="registrarReconteo()" #reconteoForm="ngForm">
+          <!-- ID solo lectura -->
+          <div class="form-group">
+            <label for="reconteoMaterialId">ID Material:</label>
+            <input 
+              type="number" 
+              id="reconteoMaterialId" 
+              [(ngModel)]="reconteoData.materialId" 
+              name="materialId" 
+              readonly />
+          </div>
+
+          <!-- Reconteo -->
+          <div class="form-group">
+            <label for="reconteo">Reconteo:</label>
+            <input 
+              type="number" 
+              id="reconteo"
+              [(ngModel)]="reconteoData.reconteo" 
+              name="reconteo" 
+              required />
+          </div>
+
+          <!-- Observación -->
+          <div class="form-group">
+            <label for="reconteoObs">Observación:</label>
+            <input 
+              type="text" 
+              id="reconteoObs"
+              [(ngModel)]="reconteoData.obs" 
+              name="obs" />
+          </div>
+
+          <!-- 👇 Campo extra SOLO para ADMINISTRADOR -->
+          <div class="form-group" *ngIf="usuarioRol === 'ADMINISTRADOR'">
+            <label for="reconteoLocal">Seleccione Local:</label>
+            <select 
+              id="reconteoLocal"
+              [(ngModel)]="reconteoData.local" 
+              name="local" 
+              required>
+              <option value="" disabled selected>-- Seleccione un local --</option>
+              <option value="HUACHIPA">HUACHIPA</option>
+              <option value="SULLANA">SULLANA</option>
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="closeReconteoModal()">Cancelar</button>
+            <button type="submit" [disabled]="reconteoForm.invalid" class="btn-primary">Registrar</button>
+          </div>
+        </form>
+
+        <p class="modal-message">{{ mensajeReconteo }}</p>
+      </div>
+    </div>
+  </div>
+
+<!-- Modales de Gestión de Usuarios -->
+
+<!-- Modal Crear Usuario -->
+<div class="modal-backdrop" *ngIf="showCrearUsuarioModal" (click)="closeCrearUsuarioModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Crear Inventariador</h2>
+      <button class="modal-close" (click)="closeCrearUsuarioModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form (ngSubmit)="crearUsuario()" #crearUsuarioForm="ngForm">
+      <div class="form-group">
+        <label for="username">Usuario:</label>
+        <input 
+          type="text" 
+          id="username"
+          [(ngModel)]="nuevoUsuario.username" 
+          name="username" 
+          required 
+          minlength="3" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña:</label>
+        <input 
+          type="password" 
+          id="password"
+          [(ngModel)]="nuevoUsuario.password" 
+          name="password" 
+          required 
+          minlength="6" />
+      </div>
+
+      <div class="form-group">
+        <label for="nombreCompleto">Nombre Completo:</label>
+        <input 
+          type="text" 
+          id="nombreCompleto"
+          [(ngModel)]="nuevoUsuario.nombreCompleto" 
+          name="nombreCompleto" 
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="local">Local:</label>
+        <select 
+          id="local"
+          [(ngModel)]="nuevoUsuario.local" 
+          name="local" 
+          required>
+          <option value="" disabled selected>-- Seleccione un local --</option>
+          <option value="HUACHIPA">HUACHIPA</option>
+          <option value="SULLANA">SULLANA</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="almacen">Almacén:</label>
+        <input 
+          type="text" 
+          id="almacen"
+          [(ngModel)]="nuevoUsuario.almacen" 
+          name="almacen" 
+          required />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeCrearUsuarioModal()">Cancelar</button>
+        <button type="submit" [disabled]="crearUsuarioForm.invalid" class="btn-primary">Crear Usuario</button>
+      </div>
+    </form>
+
+    <p class="modal-message">{{ mensajeUsuario }}</p>
   </div>
 </div>
 
+<!-- Modal Modificar Usuario -->
+<div class="modal-backdrop" *ngIf="showModificarUsuarioModal" (click)="closeModificarUsuarioModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Modificar Inventariador</h2>
+      <button class="modal-close" (click)="closeModificarUsuarioModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form (ngSubmit)="modificarUsuario()" #modificarUsuarioForm="ngForm">
+      <div class="form-group">
+        <label for="modificarUsername">Usuario:</label>
+        <input 
+          type="text" 
+          id="modificarUsername"
+          [(ngModel)]="usuarioSeleccionado.username" 
+          name="username" 
+          readonly />
+      </div>
 
+      <div class="form-group">
+        <label for="modificarPassword">Nueva Contraseña:</label>
+        <input 
+          type="password" 
+          id="modificarPassword"
+          [(ngModel)]="usuarioSeleccionado.password" 
+          name="password" 
+          required 
+          minlength="6" />
+      </div>
 
-<script>
-// Función para simular el método getEstadoIcon que debe estar en el componente TypeScript
-function getEstadoIcon(estado) {
-  if (!estado) return 'fas fa-clock';
+      <div class="form-group">
+        <label for="modificarNombreCompleto">Nombre Completo:</label>
+        <input 
+          type="text" 
+          id="modificarNombreCompleto"
+          [(ngModel)]="usuarioSeleccionado.nombreCompleto" 
+          name="nombreCompleto" 
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="modificarLocal">Local:</label>
+        <select 
+          id="modificarLocal"
+          [(ngModel)]="usuarioSeleccionado.local" 
+          name="local" 
+          required>
+          <option value="" disabled selected>-- Seleccione un local --</option>
+          <option value="HUACHIPA">HUACHIPA</option>
+          <option value="SULLANA">SULLANA</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="modificarAlmacen">Almacén:</label>
+        <input 
+          type="text" 
+          id="modificarAlmacen"
+          [(ngModel)]="usuarioSeleccionado.almacen" 
+          name="almacen" 
+          required />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModificarUsuarioModal()">Cancelar</button>
+        <button type="submit" [disabled]="modificarUsuarioForm.invalid" class="btn-primary">Modificar Usuario</button>
+      </div>
+    </form>
+
+    <p class="modal-message">{{ mensajeUsuario }}</p>
+  </div>
+</div>
+
+<!-- Modal Eliminar Usuario -->
+<div class="modal-backdrop" *ngIf="showEliminarUsuarioModal" (click)="closeEliminarUsuarioModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Eliminar Inventariador</h2>
+      <button class="modal-close" (click)="closeEliminarUsuarioModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p>¿Está seguro de que desea eliminar al inventariador <strong>{{ usuarioSeleccionado.nombreCompleto }}</strong> ({{ usuarioSeleccionado.username }})?</p>
+      <p>Esta acción no se puede deshacer.</p>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" (click)="closeEliminarUsuarioModal()">Cancelar</button>
+      <button type="button" class="btn-danger" (click)="confirmarEliminarUsuario()">Eliminar Usuario</button>
+    </div>
+
+    <p class="modal-message">{{ mensajeUsuario }}</p>
+  </div>
+</div>
   
-  const estadoLower = estado.toLowerCase();
-  if (estadoLower.includes('activo') || estadoLower.includes('completado')) {
-    return 'fas fa-check-circle';
-  } else if (estadoLower.includes('pendiente')) {
-    return 'fas fa-clock';
-  } else {
-    return 'fas fa-times-circle';
-  }
-}
-</script>
+</div>

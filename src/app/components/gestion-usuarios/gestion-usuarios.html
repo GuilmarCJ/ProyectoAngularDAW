@@ -1,0 +1,273 @@
+<div class="gestion-usuarios-container">
+  <!-- Header -->
+  <header class="gestion-header">
+    <button class="btn-volver" (click)="volverAlDashboard()">
+      <i class="fas fa-arrow-left"></i> Volver al Dashboard
+    </button>
+    <h1>Gestión de Usuarios</h1>
+    <p class="header-subtitle">Administración de Inventariadores</p>
+  </header>
+
+  <!-- Mensajes -->
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>{{ errorMessage }}</p>
+    <button (click)="errorMessage = ''" class="btn-cerrar-error">×</button>
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    <i class="fas fa-check-circle"></i>
+    <p>{{ successMessage }}</p>
+    <button (click)="successMessage = ''" class="btn-cerrar-success">×</button>
+  </div>
+
+  <!-- Tarjetas de acciones -->
+  <section class="action-cards">
+    <div class="action-card" (click)="openCrearUsuarioModal()">
+      <div class="card-icon">
+        <i class="fas fa-user-plus"></i>
+      </div>
+      <h3>Crear Inventariador</h3>
+      <p>Agregar nuevo usuario inventariador al sistema</p>
+    </div>
+
+    <div class="action-card" (click)="cargarUsuarios()">
+      <div class="card-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <h3>Listar Inventariadores</h3>
+      <p>Ver todos los usuarios inventariadores registrados</p>
+    </div>
+
+    <div class="action-card" (click)="cargarUsuarios()">
+      <div class="card-icon">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+      <h3>Actualizar Lista</h3>
+      <p>Recargar lista de usuarios</p>
+    </div>
+  </section>
+
+  <!-- Lista de usuarios -->
+  <section class="usuarios-section">
+    <div class="section-header">
+      <h2>Inventariadores Registrados</h2>
+      <span class="badge-count">{{ usuarios.length }} usuarios</span>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">
+      <div class="loading-spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <div *ngIf="!isLoading && usuarios.length === 0" class="no-data">
+      <i class="fas fa-users-slash"></i>
+      <h3>No hay inventariadores registrados</h3>
+      <p>Presiona "Crear Inventariador" para agregar el primero</p>
+    </div>
+
+    <div *ngIf="!isLoading && usuarios.length > 0" class="usuarios-grid">
+      <div *ngFor="let usuario of usuarios" class="usuario-card">
+        <div class="usuario-header">
+          <div class="usuario-avatar">
+            {{ usuario.nombreCompleto.charAt(0) | uppercase }}
+          </div>
+          <div class="usuario-info">
+            <h4>{{ usuario.nombreCompleto }}</h4>
+            <p class="usuario-username">@{{ usuario.username }}</p>
+          </div>
+        </div>
+        
+        <div class="usuario-details">
+          <div class="detail-item">
+            <i class="fas fa-store"></i>
+            <span>{{ usuario.local }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-warehouse"></i>
+            <span>{{ usuario.almacen }}</span>
+          </div>
+        </div>
+
+        <div class="usuario-actions">
+          <button class="btn-editar" (click)="openModificarUsuarioModal(usuario); $event.stopPropagation()">
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button class="btn-eliminar" (click)="openEliminarUsuarioModal(usuario); $event.stopPropagation()">
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Crear Usuario -->
+  <div class="modal-backdrop" *ngIf="showCrearUsuarioModal" (click)="closeCrearUsuarioModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Crear Inventariador</h2>
+        <button class="modal-close" (click)="closeCrearUsuarioModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="crearUsuario()" #crearUsuarioForm="ngForm">
+        <div class="form-group">
+          <label for="username">Usuario:</label>
+          <input 
+            type="text" 
+            id="username"
+            [(ngModel)]="nuevoUsuario.username" 
+            name="username" 
+            required 
+            minlength="3" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña:</label>
+          <input 
+            type="password" 
+            id="password"
+            [(ngModel)]="nuevoUsuario.password" 
+            name="password" 
+            required 
+            minlength="6" />
+        </div>
+
+        <div class="form-group">
+          <label for="nombreCompleto">Nombre Completo:</label>
+          <input 
+            type="text" 
+            id="nombreCompleto"
+            [(ngModel)]="nuevoUsuario.nombreCompleto" 
+            name="nombreCompleto" 
+            required />
+        </div>
+
+        <div class="form-group">
+          <label for="local">Local:</label>
+          <select 
+            id="local"
+            [(ngModel)]="nuevoUsuario.local" 
+            name="local" 
+            required>
+            <option value="" disabled selected>-- Seleccione un local --</option>
+            <option value="HUACHIPA">HUACHIPA</option>
+            <option value="SULLANA">SULLANA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="almacen">Almacén:</label>
+          <input 
+            type="text" 
+            id="almacen"
+            [(ngModel)]="nuevoUsuario.almacen" 
+            name="almacen" 
+            required />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeCrearUsuarioModal()">Cancelar</button>
+          <button type="submit" [disabled]="crearUsuarioForm.invalid" class="btn-primary">Crear Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Modificar Usuario -->
+  <div class="modal-backdrop" *ngIf="showModificarUsuarioModal" (click)="closeModificarUsuarioModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Modificar Inventariador</h2>
+        <button class="modal-close" (click)="closeModificarUsuarioModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="modificarUsuario()" #modificarUsuarioForm="ngForm">
+        <div class="form-group">
+          <label for="modUsername">Usuario:</label>
+          <input 
+            type="text" 
+            id="modUsername"
+            [(ngModel)]="usuarioSeleccionado.username" 
+            name="username" 
+            readonly
+            class="readonly-input" />
+        </div>
+
+        <div class="form-group">
+          <label for="modPassword">Nueva Contraseña:</label>
+          <input 
+            type="password" 
+            id="modPassword"
+            [(ngModel)]="usuarioSeleccionado.password" 
+            name="password" 
+            required 
+            minlength="6" />
+        </div>
+
+        <div class="form-group">
+          <label for="modNombreCompleto">Nombre Completo:</label>
+          <input 
+            type="text" 
+            id="modNombreCompleto"
+            [(ngModel)]="usuarioSeleccionado.nombreCompleto" 
+            name="nombreCompleto" 
+            required />
+        </div>
+
+        <div class="form-group">
+          <label for="modLocal">Local:</label>
+          <select 
+            id="modLocal"
+            [(ngModel)]="usuarioSeleccionado.local" 
+            name="local" 
+            required>
+            <option value="" disabled selected>-- Seleccione un local --</option>
+            <option value="HUACHIPA">HUACHIPA</option>
+            <option value="SULLANA">SULLANA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="modAlmacen">Almacén:</label>
+          <input 
+            type="text" 
+            id="modAlmacen"
+            [(ngModel)]="usuarioSeleccionado.almacen" 
+            name="almacen" 
+            required />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeModificarUsuarioModal()">Cancelar</button>
+          <button type="submit" [disabled]="modificarUsuarioForm.invalid" class="btn-primary">Modificar Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Eliminar Usuario -->
+  <div class="modal-backdrop" *ngIf="showEliminarUsuarioModal" (click)="closeEliminarUsuarioModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Eliminar Inventariador</h2>
+        <button class="modal-close" (click)="closeEliminarUsuarioModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <p>¿Está seguro de que desea eliminar al inventariador <strong>{{ usuarioSeleccionado.nombreCompleto }}</strong> ({{ usuarioSeleccionado.username }})?</p>
+        <p>Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeEliminarUsuarioModal()">Cancelar</button>
+        <button type="button" class="btn-danger" (click)="confirmarEliminarUsuario()">Eliminar Usuario</button>
+      </div>
+    </div>
+  </div>
+</div>

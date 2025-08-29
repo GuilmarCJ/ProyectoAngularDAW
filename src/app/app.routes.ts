@@ -3,6 +3,7 @@ import { Login } from './components/login/login';
 import { Dashboard } from './components/dashboard/dashboard';
 import { ConteoComponent } from './components/conteo/conteo';
 import { authGuard } from './guards/auth-guard';
+import { GestionUsuariosComponent } from './components/gestion-usuarios/gestion-usuarios';
 
 export const routes: Routes = [
   { 
@@ -24,6 +25,7 @@ export const routes: Routes = [
     redirectTo: '/dashboard', 
     pathMatch: 'full' 
   },
+  { path: 'gestion-usuarios', component: GestionUsuariosComponent },
   { 
     path: '**', 
     redirectTo: '/dashboard' 

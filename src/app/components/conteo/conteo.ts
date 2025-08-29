@@ -18,7 +18,7 @@ export class ConteoComponent implements OnInit {
   conteoData: ConteoRequest = {
     materialId: 0,
     conteo: 0,
-    obs: '',
+    obs: '',  
     local: ''
   };
 
